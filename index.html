@@ -3,24 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kolam AI Generator</title>
+    <title>PATTERNOVA</title>
+    <!-- Google Fonts with fallback -->
     <link
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
       rel="stylesheet"
     />
     <style>
-      /* ================= BODY ================= */
+      /* ================= COMMON ================= */
       body {
-        font-family: "Roboto", sans-serif;
+        font-family: "Roboto", Arial, Helvetica, sans-serif;
         margin: 0;
         padding: 0;
-        color: #ffffff;
         overflow-x: hidden;
+        display: flex;
+        background: #111; /* fallback */
+        color: #fff; /* fallback */
+        transition: background 0.5s ease, color 0.5s ease;
+      }
+
+      /* ================= DARK MODE ================= */
+      body.dark {
+        color: #ffffff;
         background: linear-gradient(120deg, #0f0c29, #302b63, #24243e);
         background-size: 600% 600%;
         animation: backgroundShift 20s ease infinite;
-        position: relative;
-        display: flex;
+      }
+
+      /* ================= LIGHT MODE ================= */
+      body.light {
+        color: #222;
+        background: linear-gradient(120deg, #fdfbfb, #f6f9fc, #ffffff);
+        background-size: 600% 600%;
+        animation: backgroundShiftLight 20s ease infinite;
       }
 
       @keyframes backgroundShift {
@@ -34,7 +49,19 @@
           background-position: 0% 50%;
         }
       }
+      @keyframes backgroundShiftLight {
+        0% {
+          background-position: 50% 0%;
+        }
+        50% {
+          background-position: 50% 100%;
+        }
+        100% {
+          background-position: 50% 0%;
+        }
+      }
 
+      /* ================= OVERLAY ================= */
       body::after {
         content: "";
         position: fixed;
@@ -52,8 +79,7 @@
       /* ================= SIDEBAR ================= */
       .sidebar {
         width: 220px;
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(10px);
+        background: rgba(0, 0, 0, 0.9);
         border-right: 2px solid #ff4b2b;
         height: 100vh;
         padding: 20px;
@@ -61,10 +87,19 @@
         top: 0;
         left: 0;
         z-index: 1000;
+        box-shadow: 5px 0 25px rgba(0, 0, 0, 0.6);
+      }
+      body.light .sidebar {
+        background: #ffffff;
+        border-right: 2px solid #ff6f61;
+        box-shadow: 5px 0 20px rgba(255, 111, 97, 0.2);
       }
       .sidebar h2 {
         color: #ff4b2b;
         margin-bottom: 20px;
+      }
+      body.light .sidebar h2 {
+        color: #ff6f61;
       }
       .sidebar a {
         display: block;
@@ -74,28 +109,19 @@
         border-radius: 10px;
         transition: all 0.3s ease;
       }
+      body.light .sidebar a {
+        color: #444;
+        font-weight: 600;
+      }
       .sidebar a:hover {
         background: #ff4b2b;
+        color: #fff !important;
       }
 
       /* ================= MAIN ================= */
       .main {
         margin-left: 240px;
         flex: 1;
-      }
-
-      /* ================= MOUSE TRAIL ================= */
-      .trail {
-        position: fixed;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        pointer-events: none;
-        background: #ff4b2b;
-        opacity: 0.8;
-        mix-blend-mode: screen;
-        transform: translate(-50%, -50%);
-        transition: transform 0.1s linear, opacity 0.5s linear;
       }
 
       /* ================= HEADER ================= */
@@ -107,16 +133,24 @@
         text-align: center;
         position: relative;
       }
-
+      body.light header {
+        background: #ffecec;
+        border-bottom: 4px solid rgba(255, 111, 97, 0.4);
+      }
       header h1 {
         font-size: 2.8rem;
         margin-bottom: 10px;
         color: #ff4b2b;
       }
-
+      body.light header h1 {
+        color: #ff6f61;
+      }
       header p {
         font-size: 1.2rem;
         color: #f0f0f0;
+      }
+      body.light header p {
+        color: #333;
       }
 
       #kolamHeaderCanvas {
@@ -125,184 +159,178 @@
         background: transparent;
       }
 
+      /* ================= TOGGLE BUTTON ================= */
+      .toggle-mode {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background: #ff4b2b;
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+      body.light .toggle-mode {
+        background: #444;
+        color: #fff;
+      }
+
       /* ================= SECTIONS ================= */
       section {
         margin: 50px auto;
         max-width: 800px;
-        opacity: 0;
-        animation: fadeIn 1.5s ease forwards;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 15px;
+        padding: 20px;
       }
-
-      section:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(255, 75, 43, 0.3);
-      }
-
-      @keyframes fadeIn {
-        to {
-          opacity: 1;
-        }
-      }
-
-      .upload-box {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(15px);
-        border-radius: 20px;
-        padding: 35px;
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        margin-bottom: 40px;
-        transition: all 0.3s ease;
+      body.light section {
+        background: #fff9f5;
+        border: 1px solid #ff6f61;
       }
 
       h2 {
         font-size: 1.9rem;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         color: #ff4b2b;
+      }
+      body.light h2 {
+        color: #ff6f61;
+      }
+
+      p {
+        font-size: 1rem;
+        color: #ddd;
+        line-height: 1.6;
+      }
+      body.light p {
+        color: #333;
       }
 
       input[type="file"] {
         margin-top: 15px;
         padding: 12px;
-        border: 2px dashed rgba(255, 255, 255, 0.3);
+        border: 2px dashed #ff4b2b;
         border-radius: 12px;
-        background: rgba(255, 255, 255, 0.05);
-        cursor: pointer;
+        background: #111;
         color: #fff;
-        font-weight: 500;
-        transition: all 0.3s ease;
       }
-
-      input[type="file"]:hover,
-      input[type="file"]:focus {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: #ff4b2b;
+      body.light input[type="file"] {
+        border: 2px dashed #ff6f61;
+        background: #fff2ec;
+        color: #444;
       }
 
       canvas,
-      img {
+      img,
+      video {
         max-width: 100%;
         margin-top: 20px;
         border-radius: 15px;
-        border: 2px solid rgba(255, 75, 43, 0.7);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 2px solid #ff4b2b;
       }
-
-      canvas:hover,
-      img:hover {
-        transform: scale(1.03);
-        box-shadow: 0 10px 25px rgba(255, 75, 43, 0.4);
+      body.light canvas,
+      body.light img,
+      body.light video {
+        border: 2px solid #ff6f61;
       }
 
       button {
         padding: 14px 40px;
         background: #ff4b2b;
         color: #fff;
-        font-size: 16px;
-        font-weight: 600;
         border: none;
         border-radius: 15px;
         cursor: pointer;
         margin-top: 15px;
-        transition: all 0.3s ease;
       }
-
-      button:hover {
-        background: #ff652b;
-        transform: scale(1.05);
-        box-shadow: 0 5px 20px rgba(255, 75, 43, 0.5);
+      body.light button {
+        background: #ff6f61;
       }
 
       footer {
         margin-top: 40px;
         padding: 25px;
-        background: rgba(0, 0, 0, 0.85);
+        background: #000;
         color: #f0f0f0;
         font-size: 14px;
-        border-top: 2px solid #ff4b2b;
         text-align: center;
       }
-
-      footer p {
-        margin: 0;
+      body.light footer {
+        background: #fff2ec;
+        color: #444;
       }
     </style>
   </head>
-  <body>
+  <body class="dark">
     <!-- Sidebar -->
     <div class="sidebar">
       <h2>Kolam Menu</h2>
       <a href="#upload">Upload Kolam</a>
-      <a href="#recreate">Recreation</a>
-      <a href="#generate">Generate</a>
+      <a href="#dots">Dot Detection</a>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#video">Video</a>
     </div>
 
     <!-- Main -->
     <div class="main">
       <header>
-        <h1>Kolam AI Generator</h1>
+        <h1>PATTERNOVA</h1>
         <p>Preserving Tradition with Machine Learning ⚡</p>
         <canvas id="kolamHeaderCanvas" width="300" height="300"></canvas>
+        <button class="toggle-mode" id="toggleModeBtn">🌙 Dark Mode</button>
       </header>
 
-      <section id="upload" class="upload-box">
+      <!-- Upload -->
+      <section id="upload">
         <h2>Upload a Kolam</h2>
         <input type="file" id="fileInput" accept="image/*" />
+        <div id="uploadedPreview"></div>
+      </section>
+
+      <!-- Dot Detection -->
+      <section id="dots">
+        <h2>Dot Detection</h2>
         <button onclick="analyzeKolam()">Analyze Kolam</button>
-        <div id="analysisResult"></div>
+        <div id="dotResult"></div>
       </section>
 
-      <section id="recreate" class="upload-box">
-        <h2>Step-by-Step Recreation</h2>
-        <button onclick="recreateKolam()">Recreate</button>
-        <div id="recreationCanvas"></div>
+      <!-- About -->
+      <section id="about">
+        <h2>About Us</h2>
+        <p>
+          Kolam AI Generator is a digital initiative to preserve and modernize
+          the traditional art of Kolam using Artificial Intelligence.
+        </p>
       </section>
 
-      <section id="generate" class="upload-box">
-        <h2>Generate New Kolam Variations</h2>
-        <button onclick="generateKolam()">Generate</button>
-        <div id="generatedKolam"></div>
+      <!-- Services -->
+      <section id="services">
+        <h2>Our Services</h2>
+        <p>✨ Upload and analyze Kolam patterns with AI detection.</p>
+        <p>✨ Detect dots and symmetry in traditional designs.</p>
+        <p>✨ Provide step-by-step visual analysis.</p>
+        <p>✨ Learn and explore new Kolam patterns interactively.</p>
+      </section>
+
+      <!-- Video -->
+      <section id="video">
+        <h2>Watch Our Demo</h2>
+        <video controls>
+          <source src="your-demo-video.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       </section>
 
       <footer>
-        <p>© 2025 Kolam AI Project | Designed with ✨ Neon Professional UI</p>
+        <p>© 2025 Kolam AI Project</p>
       </footer>
     </div>
 
     <script>
-      /* ================= MOUSE TRAIL ================= */
-      const trailCount = 20;
-      const trails = [];
-      for (let i = 0; i < trailCount; i++) {
-        const div = document.createElement("div");
-        div.className = "trail";
-        document.body.appendChild(div);
-        trails.push({ el: div, x: 0, y: 0 });
-      }
-
-      let mouseX = 0,
-        mouseY = 0;
-      document.addEventListener("mousemove", (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-      });
-
-      function animateTrail() {
-        let x = mouseX,
-          y = mouseY;
-        trails.forEach((trail, index) => {
-          trail.x += (x - trail.x) * 0.3;
-          trail.y += (y - trail.y) * 0.3;
-          trail.el.style.transform = `translate(${trail.x}px, ${trail.y}px)`;
-          trail.el.style.opacity = (trailCount - index) / trailCount;
-          x = trail.x;
-          y = trail.y;
-        });
-        requestAnimationFrame(animateTrail);
-      }
-      animateTrail();
-
-      /* ================= HEADER PONGAL KOLAM ANIMATION ================= */
+      /* ================= HEADER KOLAM ANIMATION ================= */
       const kolamCanvas = document.getElementById("kolamHeaderCanvas");
       const kctx = kolamCanvas.getContext("2d");
 
@@ -310,12 +338,10 @@
         kctx.clearRect(0, 0, kolamCanvas.width, kolamCanvas.height);
         kctx.strokeStyle = "#ff4b2b";
         kctx.lineWidth = 2;
-
         const cx = 150,
-          cy = 150;
-        const radius = 60;
+          cy = 150,
+          radius = 60;
 
-        // Four symmetric lotus-like patterns
         for (let j = 0; j < 4; j++) {
           kctx.beginPath();
           for (let i = 0; i <= 360; i += 30) {
@@ -329,122 +355,107 @@
           kctx.closePath();
           kctx.stroke();
         }
-
         requestAnimationFrame(() => drawPongalKolam(t + 1));
       }
       drawPongalKolam(0);
 
-      /* ================= ANALYZE ================= */
-      function analyzeKolam() {
-        const fileInput = document.getElementById("fileInput");
-        if (!fileInput.files[0]) {
-          alert("Please select an image first!");
-          return;
-        }
+      /* ================= UPLOAD PREVIEW ================= */
+      const fileInput = document.getElementById("fileInput");
+      const uploadedPreview = document.getElementById("uploadedPreview");
+      let uploadedImageData = null;
+
+      fileInput.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
         const reader = new FileReader();
         reader.onload = function (e) {
-          const img = new Image();
-          img.src = e.target.result;
-
-          img.onload = function () {
-            const canvas = document.createElement("canvas");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0);
-
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-            let dotCount = 0;
-
-            for (let i = 0; i < data.length; i += 4) {
-              const r = data[i],
-                g = data[i + 1],
-                b = data[i + 2];
-              const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
-              if (brightness > 200) dotCount++;
-            }
-            dotCount = Math.floor(dotCount / 50);
-
-            document.getElementById("analysisResult").innerHTML = `
-              <p><b>Symmetry:</b> Radial (approx.)</p>
-              <p><b>Dots detected:</b> ${dotCount}</p>
-              <img src="${e.target.result}" alt="Uploaded Kolam" style="max-width: 300px; margin-top: 15px;">
-            `;
-          };
+          uploadedImageData = e.target.result;
+          uploadedPreview.innerHTML = `<img src="${uploadedImageData}" alt="Uploaded Kolam" style="max-width: 300px;">`;
         };
-        reader.readAsDataURL(fileInput.files[0]);
-      }
+        reader.readAsDataURL(file);
+      });
 
-      /* ================= RECREATE ================= */
-      function recreateKolam() {
-        const container = document.getElementById("recreationCanvas");
-        container.innerHTML = "";
-        const canvas = document.createElement("canvas");
-        canvas.width = 400;
-        canvas.height = 400;
-        container.appendChild(canvas);
-        const ctx = canvas.getContext("2d");
+      /* ================= DOT DETECTION ================= */
+      function analyzeKolam() {
+        const dotResult = document.getElementById("dotResult");
 
-        ctx.strokeStyle = "#ff4b2b";
-        ctx.lineWidth = 2;
+        if (!uploadedImageData) {
+          alert("Please upload a Kolam first!");
+          return;
+        }
 
-        let step = 0;
-        function drawStep() {
-          if (step < 6) {
-            ctx.beginPath();
-            ctx.arc(200, 200, 40 + step * 25, 0, Math.PI * 2);
-            ctx.stroke();
-            step++;
-            setTimeout(drawStep, 500);
-          } else if (step < 18) {
-            const i = step - 6;
-            const angle = (i * Math.PI * 2) / 12;
-            const x = 200 + Math.cos(angle) * 140;
-            const y = 200 + Math.sin(angle) * 140;
-            ctx.beginPath();
-            ctx.arc(x, y, 10, 0, Math.PI * 2);
-            ctx.fillStyle = "#ff4b2b";
-            ctx.fill();
-            step++;
-            setTimeout(drawStep, 400);
+        dotResult.innerHTML = `<p style="color:#ff4b2b;">🤖 Detecting dots...</p>`;
+
+        const img = new Image();
+        img.src = uploadedImageData;
+
+        img.onload = function () {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+          let dotCount = 0;
+
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i],
+              g = data[i + 1],
+              b = data[i + 2];
+            const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+            if (brightness > 240) dotCount++;
           }
-        }
-        drawStep();
+          dotCount = Math.floor(dotCount / 100);
+
+          // Decide shape type based on dots
+          let shapeType = "Flower 🌸 (default)";
+          if (dotCount % 4 === 0) shapeType = "Flower 🌸";
+          else if (dotCount % 5 === 0) shapeType = "Diamond 💎";
+          else if (dotCount % 6 === 0) shapeType = "Spiral 🌀";
+          else if (dotCount % 7 === 0) shapeType = "Heart ❤️";
+
+          dotResult.innerHTML = `
+            <p><b>Dots detected:</b> ${dotCount}</p>
+            <p><b>Detected Shape:</b> ${shapeType}</p>
+            <p><b>Available Shapes:</b> Flower 🌸 | Diamond 💎 | Spiral 🌀 | Heart ❤️</p>
+          `;
+        };
       }
 
-      /* ================= GENERATE ================= */
-      function generateKolam() {
-        const container = document.getElementById("generatedKolam");
-        container.innerHTML = "";
-        const canvas = document.createElement("canvas");
-        canvas.width = 400;
-        canvas.height = 400;
-        container.appendChild(canvas);
-        const ctx = canvas.getContext("2d");
+      /* ================= TOGGLE DARK/LIGHT ================= */
+      const toggleBtn = document.getElementById("toggleModeBtn");
+      const body = document.body;
 
-        ctx.strokeStyle = "#ff4b2b";
-        ctx.lineWidth = 2;
-
-        for (let i = 0; i < 5 + Math.random() * 5; i++) {
-          ctx.beginPath();
-          ctx.arc(200, 200, 40 + i * (20 + Math.random() * 10), 0, Math.PI * 2);
-          ctx.stroke();
+      try {
+        if (localStorage.getItem("theme") === "light") {
+          body.classList.remove("dark");
+          body.classList.add("light");
+          toggleBtn.textContent = "☀️ Light Mode";
         }
-
-        const dots = 8 + Math.floor(Math.random() * 8);
-        for (let i = 0; i < dots; i++) {
-          const angle = (i * Math.PI * 2) / dots;
-          const radius = 80 + Math.random() * 100;
-          const x = 200 + Math.cos(angle) * radius;
-          const y = 200 + Math.sin(angle) * radius;
-          ctx.beginPath();
-          ctx.arc(x, y, 8, 0, Math.PI * 2);
-          ctx.fillStyle = "#ff4b2b";
-          ctx.fill();
-        }
+      } catch (e) {
+        console.warn("LocalStorage not supported");
       }
+
+      toggleBtn.addEventListener("click", () => {
+        if (body.classList.contains("dark")) {
+          body.classList.remove("dark");
+          body.classList.add("light");
+          toggleBtn.textContent = "☀️ Light Mode";
+          try {
+            localStorage.setItem("theme", "light");
+          } catch (e) {}
+        } else {
+          body.classList.remove("light");
+          body.classList.add("dark");
+          toggleBtn.textContent = "🌙 Dark Mode";
+          try {
+            localStorage.setItem("theme", "dark");
+          } catch (e) {}
+        }
+      });
     </script>
   </body>
 </html>
