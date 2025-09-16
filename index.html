@@ -17,20 +17,19 @@
         padding: 0;
         overflow-x: hidden;
         display: flex;
-        background: #111; /* fallback */
-        color: #fff; /* fallback */
+        background: #111;
+        color: #fff;
         transition: background 0.5s ease, color 0.5s ease;
       }
 
-      /* ================= DARK MODE ================= */
+      /* DARK MODE */
       body.dark {
-        color: #ffffff;
         background: linear-gradient(120deg, #0f0c29, #302b63, #24243e);
         background-size: 600% 600%;
         animation: backgroundShift 20s ease infinite;
       }
 
-      /* ================= LIGHT MODE ================= */
+      /* LIGHT MODE */
       body.light {
         color: #222;
         background: linear-gradient(120deg, #fdfbfb, #f6f9fc, #ffffff);
@@ -79,24 +78,27 @@
       /* ================= SIDEBAR ================= */
       .sidebar {
         width: 220px;
-        background: rgba(0, 0, 0, 0.9);
+        background: rgba(0, 0, 0, 0.95);
         border-right: 2px solid #ff4b2b;
         height: 100vh;
         padding: 20px;
         position: fixed;
         top: 0;
-        left: 0;
+        left: -240px; /* hidden by default */
         z-index: 1000;
-        box-shadow: 5px 0 25px rgba(0, 0, 0, 0.6);
+        transition: left 0.3s ease;
+      }
+      .sidebar.active {
+        left: 0;
       }
       body.light .sidebar {
         background: #ffffff;
         border-right: 2px solid #ff6f61;
-        box-shadow: 5px 0 20px rgba(255, 111, 97, 0.2);
       }
       .sidebar h2 {
         color: #ff4b2b;
         margin-bottom: 20px;
+        margin-top: 80px; /* ✅ More space below hamburger */
       }
       body.light .sidebar h2 {
         color: #ff6f61;
@@ -118,10 +120,33 @@
         color: #fff !important;
       }
 
+      /* Sidebar toggle button */
+      .menu-toggle {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1100;
+        font-size: 24px;
+        background: #ff4b2b;
+        color: #fff;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        border: none;
+      }
+      body.light .menu-toggle {
+        background: #444;
+      }
+
       /* ================= MAIN ================= */
       .main {
-        margin-left: 240px;
+        margin-left: 0;
         flex: 1;
+        transition: margin-left 0.3s ease;
+        width: 100%;
+      }
+      .sidebar.active ~ .main {
+        margin-left: 240px;
       }
 
       /* ================= HEADER ================= */
@@ -135,7 +160,6 @@
       }
       body.light header {
         background: #ffecec;
-        border-bottom: 4px solid rgba(255, 111, 97, 0.4);
       }
       header h1 {
         font-size: 2.8rem;
@@ -145,13 +169,6 @@
       body.light header h1 {
         color: #ff6f61;
       }
-      header p {
-        font-size: 1.2rem;
-        color: #f0f0f0;
-      }
-      body.light header p {
-        color: #333;
-      }
 
       #kolamHeaderCanvas {
         display: block;
@@ -159,7 +176,7 @@
         background: transparent;
       }
 
-      /* ================= TOGGLE BUTTON ================= */
+      /* TOGGLE BUTTON */
       .toggle-mode {
         position: absolute;
         top: 20px;
@@ -174,7 +191,6 @@
       }
       body.light .toggle-mode {
         background: #444;
-        color: #fff;
       }
 
       /* ================= SECTIONS ================= */
@@ -187,7 +203,6 @@
       }
       body.light section {
         background: #fff9f5;
-        border: 1px solid #ff6f61;
       }
 
       h2 {
@@ -199,15 +214,6 @@
         color: #ff6f61;
       }
 
-      p {
-        font-size: 1rem;
-        color: #ddd;
-        line-height: 1.6;
-      }
-      body.light p {
-        color: #333;
-      }
-
       input[type="file"] {
         margin-top: 15px;
         padding: 12px;
@@ -215,11 +221,6 @@
         border-radius: 12px;
         background: #111;
         color: #fff;
-      }
-      body.light input[type="file"] {
-        border: 2px dashed #ff6f61;
-        background: #fff2ec;
-        color: #444;
       }
 
       canvas,
@@ -230,18 +231,13 @@
         border-radius: 15px;
         border: 2px solid #ff4b2b;
       }
-      body.light canvas,
-      body.light img,
-      body.light video {
-        border: 2px solid #ff6f61;
-      }
 
       button {
-        padding: 14px 40px;
+        padding: 14px 30px;
         background: #ff4b2b;
         color: #fff;
         border: none;
-        border-radius: 15px;
+        border-radius: 12px;
         cursor: pointer;
         margin-top: 15px;
       }
@@ -250,22 +246,19 @@
       }
 
       footer {
-        margin-top: 40px;
-        padding: 25px;
-        background: #000;
-        color: #f0f0f0;
-        font-size: 14px;
         text-align: center;
-      }
-      body.light footer {
-        background: #fff2ec;
-        color: #444;
+        padding: 20px;
+        font-size: 14px;
+        opacity: 0.8;
       }
     </style>
   </head>
   <body class="dark">
+    <!-- Sidebar Toggle -->
+    <button class="menu-toggle" id="menuToggle">☰</button>
+
     <!-- Sidebar -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
       <h2>Kolam Menu</h2>
       <a href="#upload">Upload Kolam</a>
       <a href="#dots">Dot Detection</a>
@@ -293,7 +286,26 @@
       <!-- Dot Detection -->
       <section id="dots">
         <h2>Dot Detection</h2>
-        <button onclick="analyzeKolam()">Analyze Kolam</button>
+        <div id="shapeOptions" style="display: none">
+          <p><b>Select Shape:</b></p>
+          <label
+            ><input type="radio" name="shape" value="Flower 🌸" checked />
+            Flower 🌸</label
+          ><br />
+          <label
+            ><input type="radio" name="shape" value="Diamond 💎" /> Diamond
+            💎</label
+          ><br />
+          <label
+            ><input type="radio" name="shape" value="Spiral 🌀" /> Spiral
+            🌀</label
+          ><br />
+          <label
+            ><input type="radio" name="shape" value="Heart ❤️" /> Heart
+            ❤️</label
+          ><br />
+          <button onclick="analyzeKolam()">Analyze</button>
+        </div>
         <div id="dotResult"></div>
       </section>
 
@@ -304,6 +316,20 @@
           Kolam AI Generator is a digital initiative to preserve and modernize
           the traditional art of Kolam using Artificial Intelligence.
         </p>
+        <p>
+          Our mission is to bridge the gap between cultural heritage and modern
+          technology by creating a platform where traditional Kolam designs can
+          be reimagined, learned, and analyzed.
+        </p>
+        <p>
+          With the help of AI, we not only showcase the beauty of Kolams but
+          also make them more accessible for the younger generation to learn,
+          practice, and experiment creatively.
+        </p>
+        <p>
+          This project aims to combine tradition with innovation, keeping the
+          legacy of Kolams alive in a modern, digital-first world.
+        </p>
       </section>
 
       <!-- Services -->
@@ -313,6 +339,9 @@
         <p>✨ Detect dots and symmetry in traditional designs.</p>
         <p>✨ Provide step-by-step visual analysis.</p>
         <p>✨ Learn and explore new Kolam patterns interactively.</p>
+        <p>✨ Save and share your Kolam designs with the community.</p>
+        <p>✨ Personalized learning experience with AI suggestions.</p>
+        <p>✨ Support for multiple design styles and creativity.</p>
       </section>
 
       <!-- Video -->
@@ -330,10 +359,16 @@
     </div>
 
     <script>
-      /* ================= HEADER KOLAM ANIMATION ================= */
+      /* Sidebar Toggle */
+      const menuToggle = document.getElementById("menuToggle");
+      const sidebar = document.getElementById("sidebar");
+      menuToggle.addEventListener("click", () => {
+        sidebar.classList.toggle("active");
+      });
+
+      /* Header Animation */
       const kolamCanvas = document.getElementById("kolamHeaderCanvas");
       const kctx = kolamCanvas.getContext("2d");
-
       function drawPongalKolam(t) {
         kctx.clearRect(0, 0, kolamCanvas.width, kolamCanvas.height);
         kctx.strokeStyle = "#ff4b2b";
@@ -341,7 +376,6 @@
         const cx = 150,
           cy = 150,
           radius = 60;
-
         for (let j = 0; j < 4; j++) {
           kctx.beginPath();
           for (let i = 0; i <= 360; i += 30) {
@@ -359,7 +393,7 @@
       }
       drawPongalKolam(0);
 
-      /* ================= UPLOAD PREVIEW ================= */
+      /* Upload Preview */
       const fileInput = document.getElementById("fileInput");
       const uploadedPreview = document.getElementById("uploadedPreview");
       let uploadedImageData = null;
@@ -372,24 +406,26 @@
         reader.onload = function (e) {
           uploadedImageData = e.target.result;
           uploadedPreview.innerHTML = `<img src="${uploadedImageData}" alt="Uploaded Kolam" style="max-width: 300px;">`;
+          document.getElementById("shapeOptions").style.display = "block";
         };
         reader.readAsDataURL(file);
       });
 
-      /* ================= DOT DETECTION ================= */
+      /* Analyze Kolam */
       function analyzeKolam() {
         const dotResult = document.getElementById("dotResult");
-
         if (!uploadedImageData) {
           alert("Please upload a Kolam first!");
           return;
         }
 
-        dotResult.innerHTML = `<p style="color:#ff4b2b;">🤖 Detecting dots...</p>`;
+        const selectedShape = document.querySelector(
+          'input[name="shape"]:checked'
+        ).value;
+        dotResult.innerHTML = `<p style="color:#ff4b2b;">🤖 Analyzing for ${selectedShape}...</p>`;
 
         const img = new Image();
         img.src = uploadedImageData;
-
         img.onload = function () {
           const canvas = document.createElement("canvas");
           canvas.width = img.width;
@@ -400,60 +436,39 @@
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const data = imageData.data;
           let dotCount = 0;
-
           for (let i = 0; i < data.length; i += 4) {
-            const r = data[i],
-              g = data[i + 1],
-              b = data[i + 2];
-            const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+            const brightness =
+              0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
             if (brightness > 240) dotCount++;
           }
           dotCount = Math.floor(dotCount / 100);
 
-          // Decide shape type based on dots
-          let shapeType = "Flower 🌸 (default)";
-          if (dotCount % 4 === 0) shapeType = "Flower 🌸";
-          else if (dotCount % 5 === 0) shapeType = "Diamond 💎";
-          else if (dotCount % 6 === 0) shapeType = "Spiral 🌀";
-          else if (dotCount % 7 === 0) shapeType = "Heart ❤️";
-
           dotResult.innerHTML = `
             <p><b>Dots detected:</b> ${dotCount}</p>
-            <p><b>Detected Shape:</b> ${shapeType}</p>
-            <p><b>Available Shapes:</b> Flower 🌸 | Diamond 💎 | Spiral 🌀 | Heart ❤️</p>
+            <p><b>Selected Shape:</b> ${selectedShape}</p>
           `;
         };
       }
 
-      /* ================= TOGGLE DARK/LIGHT ================= */
+      /* Toggle Dark/Light */
       const toggleBtn = document.getElementById("toggleModeBtn");
       const body = document.body;
-
-      try {
-        if (localStorage.getItem("theme") === "light") {
-          body.classList.remove("dark");
-          body.classList.add("light");
-          toggleBtn.textContent = "☀️ Light Mode";
-        }
-      } catch (e) {
-        console.warn("LocalStorage not supported");
+      if (localStorage.getItem("theme") === "light") {
+        body.classList.remove("dark");
+        body.classList.add("light");
+        toggleBtn.textContent = "☀️ Light Mode";
       }
-
       toggleBtn.addEventListener("click", () => {
         if (body.classList.contains("dark")) {
           body.classList.remove("dark");
           body.classList.add("light");
           toggleBtn.textContent = "☀️ Light Mode";
-          try {
-            localStorage.setItem("theme", "light");
-          } catch (e) {}
+          localStorage.setItem("theme", "light");
         } else {
           body.classList.remove("light");
           body.classList.add("dark");
           toggleBtn.textContent = "🌙 Dark Mode";
-          try {
-            localStorage.setItem("theme", "dark");
-          } catch (e) {}
+          localStorage.setItem("theme", "dark");
         }
       });
     </script>
